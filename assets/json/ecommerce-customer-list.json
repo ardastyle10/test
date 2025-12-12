@@ -1,0 +1,20 @@
+[
+  {
+    "id": "1",
+    "userName": "John Doe",
+    "email": "john@example.com",
+    "phone": "1234567890",
+    "rating": "4.5",
+    "balance": "$120.00",
+    "joinDate": "2024-01-15"
+  },
+  {
+    "id": "2",
+    "userName": "Jane Smith",
+    "email": "jane@example.com",
+    "phone": "0987654321",
+    "rating": "4.8",
+    "balance": "$250.00",
+    "joinDate": "2023-12-20"
+  }
+]

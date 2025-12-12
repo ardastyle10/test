@@ -1,0 +1,49 @@
+
+// Buat elemen container
+const backToTopHTML = `
+  <div class="toTopB" onclick='window.scrollTo({top: 0, behavior: "smooth"});'>
+    <svg viewBox="0 0 34 34">
+      <circle class="b" cx="17" cy="17" r="15.92"></circle>
+      <circle class="c scrollProgress" cx="17" cy="17" r="15.92"></circle>
+      <path class="line d" d="M15.07,21.06,19.16,17l-4.09-4.06"></path>
+    </svg>
+  </div>
+
+  <style>
+  .toTopB{display:flex;align-items:center;justify-content:center;position:fixed;right:20px;bottom:20px;width:45px;height:45px;border-radius:50%;cursor:pointer;visibility:hidden;opacity:0;z-index:5;transform:scale(0);transition:transform .3s ease,opacity .3s ease,visibility .3s ease,margin-bottom 1s ease;}
+  .toTopB.vsbl{visibility:visible;opacity:1;transform:scale(1);}
+  .toTopB:hover{opacity:.8;}
+  .toTopB svg{height:100%;width:100%;transform:rotate(-90deg);stroke-width:1.5;cursor:pointer;}
+  .toTopB svg .b{fill:#fff;stroke:#e6e6e6;opacity:.9;}
+  .toTopB svg .c{fill:none;stroke:var(--bst-info);stroke-dasharray:100 100;stroke-dashoffset:100;stroke-linecap:round;transition:stroke-dashoffset .2s linear;}
+  .toTopB svg .d{fill:none;stroke:#08102b;}
+  .drK .toTopB svg .b{fill:#2d2d30;stroke:#404045;}
+  .drK .toTopB svg .c{stroke:#41B375;}
+  .drK .toTopB svg .d{stroke:#fffdfc;}
+  </style>
+`;
+
+// Masukkan ke body
+document.body.insertAdjacentHTML("beforeend", backToTopHTML);
+
+// Aktifkan fungsionalitas
+const backTop = document.querySelector(".toTopB");
+const progressCircle = document.querySelector(".scrollProgress");
+
+window.addEventListener("scroll", () => {
+  const scrollTop = window.scrollY;
+  const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+  const scrollPercent = scrollTop / docHeight;
+  const offset = 100 - scrollPercent * 100;
+
+  // Update stroke dashoffset
+  progressCircle.style.strokeDashoffset = offset;
+
+  // Show/hide button
+  if (scrollTop > 100) {
+    backTop.classList.add("vsbl");
+  } else {
+    backTop.classList.remove("vsbl");
+  }
+});
+

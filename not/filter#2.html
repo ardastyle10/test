@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+</head>
+<body class="bg-light">
+
+<div class="container py-4">
+
+  <h4 class="fw-bold mb-3">Filter</h4>
+
+  <!-- Scrollable badges -->
+  <div class="d-flex overflow-auto pb-2" id="filterBar">
+
+    <span class="badge bg-light text-dark rounded-pill me-2 p-2 px-3" data-filter="terbaru">Tanggal Terbaru</span>
+    <span class="badge bg-light text-dark rounded-pill me-2 p-2 px-3" data-filter="terlama">Tanggal Terlama</span>
+    <span class="badge bg-light text-dark rounded-pill me-2 p-2 px-3" data-filter="sale">Sale</span>
+    <span class="badge bg-light text-dark rounded-pill me-2 p-2 px-3" data-filter="premium">Premium</span>
+    <span class="badge bg-light text-dark rounded-pill me-2 p-2 px-3" data-filter="banned">Banned</span>
+    <span class="badge bg-light text-dark rounded-pill me-2 p-2 px-3" data-filter="public">Public</span>
+
+    <!-- tambahan contoh -->
+    <span class="badge bg-light text-dark rounded-pill me-2 p-2 px-3" data-filter="toyota">Toyota</span>
+    <span class="badge bg-light text-dark rounded-pill me-2 p-2 px-3" data-filter="honda">Honda</span>
+    <span class="badge bg-light text-dark rounded-pill me-2 p-2 px-3" data-filter="bmw">BMW</span>
+    <span class="badge bg-light text-dark rounded-pill me-2 p-2 px-3" data-filter="mercedes">Mercedes</span>
+
+  </div>
+
+  <hr>
+
+  <div id="output" class="text-secondary">Klik filter…</div>
+
+</div>
+
+<script>
+  const filterBar = document.getElementById("filterBar");
+  const output = document.getElementById("output");
+
+  filterBar.querySelectorAll("span").forEach(badge => {
+    badge.addEventListener("click", () => {
+
+      // reset semua badge ke default putih
+      filterBar.querySelectorAll("span").forEach(b => {
+        b.classList.remove("bg-success", "text-white");
+        b.classList.add("bg-light", "text-dark");
+      });
+
+      // aktifkan badge yg diklik → success
+      badge.classList.remove("bg-light", "text-dark");
+      badge.classList.add("bg-success", "text-white");
+
+      // scroll otomatis ke tengah
+      badge.scrollIntoView({ behavior: "smooth", inline: "center" });
+
+      // contoh output
+      output.textContent = "Filter aktif: " + badge.dataset.filter;
+    });
+  });
+</script>
+
+</body>
+</html>

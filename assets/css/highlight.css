@@ -1,0 +1,23 @@
+
+      pre[class*="language-"] {
+        padding: 1rem;
+        border-radius: 0.5rem;
+        background: #000000;
+        overflow-x: auto;
+        font-size: 0.870rem;
+      }
+
+      .copy-button {
+        position: absolute;
+        right: 1rem;
+        top: 0.5rem;
+        cursor: pointer;
+        background: none;
+        border: none;
+        color: white;
+      }
+
+      .copy-button:hover {
+        color: #4ade80; /* Tailwind's green-400 */
+      }
+    

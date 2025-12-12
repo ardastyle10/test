@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Contoh Select Bootstrap</title>
+    <!-- Bootstrap 5 CSS (CDN) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  </head>
+  <body class="bg-light p-4">
+    <div class="container">
+      <h1 class="mb-4">Contoh Select (Bootstrap 5)</h1>
+
+      <!-- Basic select -->
+      <div class="mb-3">
+        <label for="selectBasic" class="form-label">Pilih Mobil</label>
+        <select id="selectBasic" class="form-select" aria-label="Pilih mobil">
+          <option selected>Pilih salah satu...</option>
+          <option value="sedan">Sedan</option>
+          <option value="suv">SUV</option>
+          <option value="hatchback">Hatchback</option>
+          <option value="truck">Truck</option>
+        </select>
+      </div>
+
+      <!-- Select with optgroup -->
+      <div class="mb-3">
+        <label for="selectOptgroup" class="form-label">Pilih Merk</label>
+        <select id="selectOptgroup" class="form-select">
+          <option value="">Pilih merk...</option>
+          <optgroup label="Jepang">
+            <option value="toyota">Toyota</option>
+            <option value="honda">Honda</option>
+          </optgroup>
+          <optgroup label="Eropa">
+            <option value="bmw">BMW</option>
+            <option value="audi">Audi</option>
+          </optgroup>
+        </select>
+      </div>
+
+      <!-- Multiple select -->
+      <div class="mb-3">
+        <label for="selectMultiple" class="form-label">Pilih fitur (multi)</label>
+        <select id="selectMultiple" class="form-select" multiple size="4">
+          <option value="ac">AC</option>
+          <option value="abs">ABS</option>
+          <option value="airbag">Airbag</option>
+          <option value="sunroof">Sunroof</option>
+          <option value="gps">GPS</option>
+        </select>
+        <div class="form-text">Tekan Ctrl (Cmd pada Mac) untuk memilih beberapa.</div>
+      </div>
+
+      <!-- Small / Large -->
+      <div class="row g-3 mb-3">
+        <div class="col-md-6">
+          <label class="form-label" for="selectSmall">Small select</label>
+          <select id="selectSmall" class="form-select form-select-sm">
+            <option>Small</option>
+            <option>Option 1</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="selectLarge">Large select</label>
+          <select id="selectLarge" class="form-select form-select-lg">
+            <option>Large</option>
+            <option>Option 1</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Disabled -->
+      <div class="mb-3">
+        <label class="form-label" for="selectDisabled">Contoh Disabled</label>
+        <select id="selectDisabled" class="form-select" disabled>
+          <option>Tidak bisa dipilih</option>
+        </select>
+      </div>
+
+      <!-- Form-floating select -->
+      <div class="mb-4" style="max-width:420px">
+        <div class="form-floating">
+          <select class="form-select" id="floatingSelect" aria-label="Floating label select example">
+            <option value="">Pilih kota...</option>
+            <option value="jakarta">Jakarta</option>
+            <option value="bandung">Bandung</option>
+            <option value="surabaya">Surabaya</option>
+          </select>
+          <label for="floatingSelect">Kota</label>
+        </div>
+      </div>
+
+      <!-- Contoh tombol submit -->
+      <button class="btn btn-primary" type="button" onclick="showValues()">Tampilkan Pilihan</button>
+
+      <pre id="output" class="mt-3 p-3 bg-white border" style="white-space:pre-wrap;"></pre>
+    </div>
+
+    <!-- Bootstrap JS (popper + bootstrap) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+      function showValues() {
+        const basic = document.getElementById('selectBasic').value;
+        const optgroup = document.getElementById('selectOptgroup').value;
+        const multipleEl = document.getElementById('selectMultiple');
+        const selectedMulti = Array.from(multipleEl.selectedOptions).map(o => o.value);
+        const out = {
+          basic,
+          optgroup,
+          multiple: selectedMulti
+        };
+        document.getElementById('output').textContent = JSON.stringify(out, null, 2);
+      }
+    </script>
+  </body>
+</html>

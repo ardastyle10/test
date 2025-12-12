@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Generator Key</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-light p-3">
+
+<div class="container mt-4">
+
+  <!-- CARD BUTTON -->
+  <div class="card shadow-sm">
+    <div class="card-body">
+
+      <h5 class="card-title mb-3">Generate Random Key</h5>
+
+      <button id="generateBtn" class="btn btn-success w-100">
+        Generate Key
+      </button>
+
+    </div>
+  </div>
+
+  <!-- HASIL GENERATE -->
+  <div id="resultArea" class="mt-4" style="display:none;">
+    <div class="card border-info">
+      <div class="card-body">
+
+        <h6 class="text-info">Hasil:</h6>
+
+        <p id="generatedResult" class="mb-3" style="word-break:break-all;"></p>
+
+        <button class="btn btn-primary w-100" id="copyBtn">Copy</button>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- JS -->
+<script>
+  function randomKey(length = 32) {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let key = "";
+    for (let i = 0; i < length; i++) {
+      key += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return key;
+  }
+
+  document.getElementById("generateBtn").addEventListener("click", () => {
+    const output = randomKey(10);
+    console.log("Key berhasil dibuat:", output);
+    document.getElementById("generatedResult").textContent = output;
+    document.getElementById("resultArea").style.display = "block";
+  });
+
+  document.getElementById("copyBtn").addEventListener("click", () => {
+    const text = document.getElementById("generatedResult").textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      alert("Berhasil disalin!");
+    });
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Filter UI Modern</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    /* ===== CHIP STYLE ===== */
+    .filter-chip {
+      padding: 6px 14px;
+      border-radius: 50px;
+      background: #f6f6f6;
+      border: 1px solid #dcdcdc;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all .2s ease;
+      user-select: none;
+    }
+    .filter-chip:hover {
+      background: #e9e9e9;
+      transform: translateY(-1px);
+    }
+    .filter-chip.active {
+      background: #0d6efd;
+      color: white;
+      border-color: #0d6efd;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+
+    /* Sort chip warna beda */
+    .sort-chip.active {
+      background: #6610f2;
+      border-color: #6610f2;
+    }
+
+    .filter-bar { gap: .5rem; }
+  </style>
+</head>
+<body class="bg-light">
+
+<div class="container py-4">
+
+  <h3 class="mb-3 fw-bold">Filter Posting</h3>
+
+  <!-- FILTER BAR -->
+  <div class="d-flex flex-wrap filter-bar">
+
+    <!-- Sort -->
+    <div class="filter-chip sort-chip active" data-sort="new">Tanggal Terbaru</div>
+    <div class="filter-chip sort-chip" data-sort="old">Tanggal Terlama</div>
+
+    <!-- Status -->
+    <div class="filter-chip status-chip" data-status="sale">Sale</div>
+    <div class="filter-chip status-chip" data-status="premium">Premium</div>
+    <div class="filter-chip status-chip" data-status="banned">Banned</div>
+    <div class="filter-chip status-chip" data-status="public">Public</div>
+
+    <!-- Clear -->
+    <div class="filter-chip" id="clear-filters" style="background:#ffe3e3;border-color:#ffbcbc;">
+      Reset
+    </div>
+
+  </div>
+
+  <hr>
+
+  <!-- HASIL -->
+  <div id="posts" class="row g-3"></div>
+
+</div>
+
+<!-- JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  const posts = [
+    {id:1,title:"A",date:"2025-11-20",status:"public",sale:false},
+    {id:2,title:"B",date:"2025-11-10",status:"premium",sale:false},
+    {id:3,title:"C",date:"2025-10-05",status:"public",sale:true},
+    {id:4,title:"D",date:"2025-09-12",status:"banned",sale:false},
+    {id:5,title:"E",date:"2025-11-22",status:"sale",sale:true},
+    {id:6,title:"F",date:"2025-08-01",status:"premium",sale:false},
+  ];
+
+  const state = {
+    sort: 'new',
+    status: new Set()
+  };
+
+  function renderPosts() {
+    const cont = document.getElementById("posts");
+    cont.innerHTML = "";
+
+    let filtered = posts.slice();
+
+    // filter status
+    if (state.status.size > 0) {
+      filtered = filtered.filter(p => {
+        if (state.status.has("sale")) {
+          if (p.sale === true || p.status === "sale") return true;
+        }
+        for (let s of state.status) {
+          if (s === "sale") continue;
+          if (p.status === s) return true;
+        }
+        return false;
+      });
+    }
+
+    // sorting
+    filtered.sort((a,b) => {
+      const da = new Date(a.date);
+      const db = new Date(b.date);
+      return state.sort === "new" ? db - da : da - db;
+    });
+
+    if (filtered.length === 0) {
+      cont.innerHTML = `<div class="col-12"><div class="alert alert-secondary">Tidak ada posting.</div></div>`;
+      return;
+    }
+
+    filtered.forEach(p => {
+      cont.innerHTML += `
+        <div class="col-md-4">
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <h5>${p.title}</h5>
+              <p class="text-muted">${p.date}</p>
+              <span class="badge bg-light text-dark">${p.status}</span>
+              ${p.sale ? '<span class="badge bg-warning text-dark ms-1">Sale</span>' : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  // SORT CHIP
+  document.querySelectorAll('.sort-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.sort-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      state.sort = chip.dataset.sort;
+      renderPosts();
+    });
+  });
+
+  // STATUS CHIP
+  document.querySelectorAll('.status-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const s = chip.dataset.status;
+
+      if (chip.classList.contains("active")) {
+        chip.classList.remove("active");
+        state.status.delete(s);
+      } else {
+        chip.classList.add("active");
+        state.status.add(s);
+      }
+
+      renderPosts();
+    });
+  });
+
+  // CLEAR
+  document.getElementById("clear-filters").addEventListener("click", () => {
+    state.status.clear();
+    state.sort = "new";
+
+    document.querySelectorAll(".filter-chip").forEach(c => c.classList.remove("active"));
+    document.querySelector('.sort-chip[data-sort="new"]').classList.add("active");
+
+    renderPosts();
+  });
+
+  renderPosts();
+</script>
+</body>
+</html>

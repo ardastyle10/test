@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Token Unlock System (Firebase) — Fix</title>
+<style>
+  body { font-family: Arial, sans-serif; background:#f5f7fb; padding:24px; }
+  h2 { text-align:center; }
+  #tokenSection { text-align:center; margin-bottom:18px; }
+  #tokenInput { padding:8px; width:260px; border-radius:6px; border:1px solid #bbb; }
+  button { padding:8px 12px; border:none; border-radius:6px; cursor:pointer; background:#007bff; color:#fff; }
+  .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; }
+  .card { background:#fff; padding:14px; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.08); text-align:center; transition:0.3s; }
+  .card h3 { margin:6px 0 12px; }
+  .card button { background:#28a745; margin:6px; }
+  .hidden { display:none; }
+  /* ubah .used supaya tidak memblokir klik tombol internal */
+  .used { opacity:.6; }
+  /* sembunyikan tombol "Gunakan Token Ini" saat card dipakai tanpa memblokir children */
+  .used .useTokenBtn { display:none !important; }
+  #status { text-align:center; margin-top:10px; color:#333; }
+  #devSection { text-align:center; margin-top:20px; }
+  #newTokenInput { padding:8px; width:240px; border-radius:6px; border:1px solid #bbb; }
+  .small { font-size:12px; color:#666; margin-top:6px; }
+</style>
+</head>
+<body>
+
+<h2>🔐 Token Unlock System (Firebase Realtime DB) — Fix</h2>
+
+<div id="tokenSection">
+  <input id="tokenInput" placeholder="Masukkan token..." />
+  <button id="submitToken">Kirim Token</button>
+  <div id="status"></div>
+  <div class="small">Pastikan token sama persis (besar/kecil & tanpa spasi)</div>
+</div>
+
+<div class="cards">
+  <div class="card" id="card1">
+    <h3>Card 1</h3>
+    <button class="useTokenBtn">Gunakan Token Ini</button>
+    <div class="hidden actions">
+      <button class="bodyBtn">BODY</button>
+      <button class="windowBtn">WINDOW</button>
+    </div>
+  </div>
+
+  <div class="card" id="card2">
+    <h3>Card 2</h3>
+    <button class="useTokenBtn">Gunakan Token Ini</button>
+    <div class="hidden actions">
+      <button class="bodyBtn">BODY</button>
+      <button class="windowBtn">WINDOW</button>
+    </div>
+  </div>
+
+  <div class="card" id="card3">
+    <h3>Card 3</h3>
+    <button class="useTokenBtn">Gunakan Token Ini</button>
+    <div class="hidden actions">
+      <button class="bodyBtn">BODY</button>
+      <button class="windowBtn">WINDOW</button>
+    </div>
+  </div>
+
+  <div class="card" id="card4">
+    <h3>Card 4</h3>
+    <button class="useTokenBtn">Gunakan Token Ini</button>
+    <div class="hidden actions">
+      <button class="bodyBtn">BODY</button>
+      <button class="windowBtn">WINDOW</button>
+    </div>
+  </div>
+
+  <div class="card" id="card5">
+    <h3>Card 5</h3>
+    <button class="useTokenBtn">Gunakan Token Ini</button>
+    <div class="hidden actions">
+      <button class="bodyBtn">BODY</button>
+      <button class="windowBtn">WINDOW</button>
+    </div>
+  </div>
+</div>
+
+<hr>
+<!-- 🔧 Developer Token Generator -->
+<div id="devSection">
+  <h3>🔧 Developer Token Generator</h3>
+  <input id="newTokenInput" placeholder="Token baru (mis: ABC123)" />
+  <button id="addTokenBtn" style="background:#6f42c1;">Tambah Token (Dev)</button>
+  <button id="genRandomBtn" style="background:#20c997;">Generate Token Random</button>
+</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+  import { getDatabase, ref, get, runTransaction, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+  import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+
+  // ======= GANTI DENGAN CONFIG FIREBASE MILIKMU (cek databaseURL) =======
+  const firebaseConfig = {
+    apiKey: "AIzaSyDMMo7jS9kyVl4Yased0Vrmh6aMXO67Z1Q",
+    authDomain: "all-in-71496.firebaseapp.com",
+    databaseURL: "https://all-in-71496-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "all-in-71496",
+    storageBucket: "all-in-71496.appspot.com",
+    messagingSenderId: "1030408536243",
+    appId: "1:1030408536243:web:669abdd465cfa25c8fb0c6"
+  };
+  // ======================================
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const auth = getAuth(app);
+
+  const statusEl = document.getElementById("status");
+  const tokenInputEl = document.getElementById("tokenInput");
+  const submitTokenBtn = document.getElementById("submitToken");
+
+  let activeToken = null;
+  let currentUser = null;
+
+  // ---------- Auth anon ----------
+  signInAnonymously(auth).catch(err => {
+    console.error("Auth error:", err);
+    statusEl.textContent = "Auth gagal: " + err.message;
+  });
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      currentUser = user;
+      statusEl.textContent = "Signed in (anon). Siap pakai token.";
+      console.log("Signed in uid:", user.uid);
+    } else {
+      currentUser = null;
+      statusEl.textContent = "Belum login.";
+    }
+  });
+
+  // ---------- Verifikasi token dari input ----------
+  submitTokenBtn.addEventListener("click", async () => {
+  const token = tokenInputEl.value.trim().replace(/^"|"$/g, ''); // hapus tanda kutip kalau ada
+  console.log("Token yang dikirim:", token);
+
+  if (!token) return alert("Masukkan token dulu.");
+  if (!currentUser) return alert("Menunggu auth...");
+
+  try {
+    const tokenRef = ref(db, "tokens/" + token);
+    const snap = await get(tokenRef);
+    console.log("Snapshot saat cek:", snap.val());
+    if (!snap.exists()) {
+      alert("Token tidak ditemukan!");
+      return;
+    }
+
+    const data = snap.val();
+    if (data.used) {
+      alert("Token sudah digunakan sebelumnya.");
+      return;
+    }
+
+    activeToken = token;
+    alert("Token terverifikasi. Sekarang pilih card mana yang mau dibuka.");
+  } catch (err) {
+    console.error("Cek token error:", err);
+    alert("Gagal cek token: " + err.message);
+  }
+});
+
+
+  // ---------- Fungsi util: attach handler sekali saja ----------
+  function attachBodyWindowHandlers(card) {
+    const bodyBtn = card.querySelector(".bodyBtn");
+    const windowBtn = card.querySelector(".windowBtn");
+
+    // hindari menambahkan listener berulang kali
+    if (!bodyBtn || bodyBtn.dataset.attached === "1") {
+      return;
+    }
+
+    bodyBtn.dataset.attached = "1";
+    windowBtn.dataset.attached = "1";
+
+    bodyBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      // Contoh aksi: buka JSON spesifik per card (ubah sesuai kebutuhan)
+      const cardId = card.id || "card";
+      const path = `assets/${cardId}-body.json`;
+      console.log("BODY clicked, buka:", path);
+      window.open(path, "_blank");
+    });
+
+    windowBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const cardId = card.id || "card";
+      const path = `assets/${cardId}-window.json`;
+      console.log("WINDOW clicked, buka:", path);
+      window.open(path, "_blank");
+    });
+  }
+
+  // ---------- Pakai token untuk buka card (dengan pre-check & logging) ----------
+  document.querySelectorAll(".useTokenBtn").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      if (!activeToken) return alert("Masukkan token dulu dan verifikasi.");
+      if (!currentUser) return alert("Menunggu auth...");
+
+      const tokenPath = "tokens/" + activeToken;
+      const tokenRef = ref(db, tokenPath);
+
+      try {
+        // pre-get untuk debug (lihat nilai sebelum transaksi)
+        const before = await get(tokenRef);
+        console.log("Data token sebelum transaksi:", before.exists() ? before.val() : null);
+        if (!before.exists()) {
+          alert("❌ Gagal: token tidak ditemukan (sebelum transaksi).");
+          activeToken = null;
+          return;
+        }
+        if (before.val().used) {
+          alert("⚠️ Gagal: token sudah digunakan sebelumnya.");
+          activeToken = null;
+          return;
+        }
+
+        // jalankan transaksi untuk atomik set used=true
+        const result = await runTransaction(tokenRef, (current) => {
+          // current berasal dari state DB saat transaksi dieksekusi
+          console.log("=== di dalam updater transaction, current:", current);
+          if (current === null) return; // abort
+          if (current.used) return;     // abort
+          return {
+            ...current,
+            used: true,
+            usedBy: currentUser.uid,
+            usedAt: Date.now()
+          };
+        });
+
+        console.log("Hasil transaksi:", result);
+
+        if (!result.committed) {
+          alert("❌ Gagal: token sudah tidak berlaku atau dibatalkan.");
+          activeToken = null;
+          return;
+        }
+
+        // sukses - buka card
+        const card = btn.closest(".card");
+        const hiddenSection = card.querySelector(".actions");
+        if (hiddenSection) hiddenSection.classList.remove("hidden");
+        card.classList.add("used"); // hanya menurunkan opacity, tidak memblokir event
+        // sembunyikan tombol useTokenBtn via CSS .used .useTokenBtn
+
+        // attach body/window handler (aman, hanya sekali)
+        attachBodyWindowHandlers(card);
+
+        alert("🎉 Berhasil! Token sekarang hangus dan tidak bisa dipakai lagi.");
+        activeToken = null;
+        tokenInputEl.value = "";
+      } catch (err) {
+        console.error("Transaksi token gagal:", err);
+        alert("Transaksi gagal: " + err.message);
+      }
+    });
+  });
+
+  // ---------- Fungsi helper untuk dev mode (pastikan set used:false) ----------
+  window.addTokenForDev = async function(tokenKey) {
+    if (!tokenKey) return alert("Masukkan nama token!");
+    try {
+      const tokenRef = ref(db, "tokens/" + tokenKey);
+      await set(tokenRef, { used: false });
+      alert("✅ Token '" + tokenKey + "' berhasil ditambahkan ke database!");
+      console.log("Token ditambahkan:", tokenKey);
+    } catch (err) {
+      console.error("❌ Gagal menambah token:", err);
+      alert("❌ Gagal menambah token: " + err.message);
+    }
+  };
+
+  // ---------- Tambahkan tombol "Tambah Token" manual ----------
+  const newTokenInput = document.getElementById("newTokenInput");
+  const addTokenBtn = document.getElementById("addTokenBtn");
+  const genRandomBtn = document.getElementById("genRandomBtn");
+
+  addTokenBtn.addEventListener("click", async () => {
+    const tokenKey = newTokenInput.value.trim();
+    if (!tokenKey) return alert("Masukkan nama token baru.");
+
+    try {
+      await window.addTokenForDev(tokenKey);
+      newTokenInput.value = "";
+    } catch (err) {
+      console.error("Gagal menambah token:", err);
+      alert("Gagal menambah token: " + err.message);
+    }
+  });
+
+  // ---------- Generator token acak ----------
+  genRandomBtn.addEventListener("click", async () => {
+    const token = generateToken(8);
+    await window.addTokenForDev(token);
+    alert("🎲 Token acak berhasil ditambahkan: " + token);
+  });
+
+  function generateToken(length = 8) {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+  }
+
+  // ---------- debug: tampilkan URL DB (opsional, non-blocking) ----------
+  setTimeout(() => {
+    try {
+      // _repoInfo internal mungkin berbeda versi; hanya coba-coba debug
+      // jika undefined, jangan crash
+      const repo = db && db.app && db.app.options && db.app.options.databaseURL;
+      console.log("Firebase Database URL (config):", repo || "(unknown)");
+    } catch (e) {
+      // ignore
+    }
+  }, 500);
+
+</script>
+</body>
+</html>
