@@ -268,78 +268,93 @@ function renderPosts(custom = null) {
   postContainer.innerHTML = "";
   const list = custom || defaultSorted;
 
-  list.forEach((post, i) => {
+  // gunakan fragment agar DOM tidak render berkali-kali
+  const fragment = document.createDocumentFragment();
 
-    let statusIcon = {
-      Public: "success",
-      Sale: "warning",
-      Premium: "info",
-      Private: "dark"
-    }[post.statusL] || "secondary";
+  list.forEach((post) => {
+    let statusIcon =
+      {
+        Public: "success",
+        Sale: "warning",
+        Premium: "info",
+        Private: "dark",
+      }[post.statusL] || "secondary";
 
-    // Cari index asli di array posts untuk openJSON agar selalu benar meskipun memakai filtered list
     const originalIndex = posts.indexOf(post);
 
-    postContainer.innerHTML += ` 
-      <div class="col-xl-3 col-md-6">
-        <div class="card position-relative">
-          <div class="card-body">
-            <div class="row align-items-center">
-              <div class="col-lg-4 image-container container-img-badge position-relative">
-                <span class="badge badge-soft-${statusIcon} position-absolute badge-kiri">${post.statusL}</span>
-                <i class="bi bi-heart heart-icon position-absolute heart-kanan text-${statusIcon}" data-target="like${post.folder}"></i>
-                <img src="frl/${post.folder}/${post.gambar}" alt="${post.judulLiv}" class="img-fluid mx-auto d-block" style="aspect-ratio: ${post.aspekRasio}; object-fit: cover;" loading="lazy">
-                <div class="position-absolute bottom-0 start-50 translate-middle-x text-white opacity-25 p-1 fs-10">&copy; <span class="copyright2">${ownerAGS}</span></div>
-                <div class="opacity-75">
-                  <div class="profile-badge ms-3">
-                    <img src="assets/img/kaiadmin/icon.png" alt="Profile Admin">
-                    <span class="copyright2">${ownerAGS}</span>
-                    <i class='bx bxs-badge-check text-info verified'></i>
-                  </div>
+    const wrapper = document.createElement("div");
+    wrapper.className = "col-xl-3 col-md-6";
+
+    wrapper.innerHTML = `
+      <div class="card position-relative">
+        <div class="card-body">
+          <div class="row align-items-center">
+            <div class="col-lg-4 image-container container-img-badge position-relative">
+              <span class="badge badge-soft-${statusIcon} position-absolute badge-kiri">${post.statusL}</span>
+              <i class="bi bi-heart heart-icon position-absolute heart-kanan text-${statusIcon}" data-target="like${post.folder}"></i>
+              <img src="frl/${post.folder}/${post.gambar}"
+                   alt="${post.judulLiv}"
+                   class="img-fluid mx-auto d-block"
+                   style="aspect-ratio: ${post.aspekRasio}; object-fit: cover;"
+                   loading="lazy">
+              <div class="position-absolute bottom-0 start-50 translate-middle-x text-white opacity-25 p-1 fs-10">
+                &copy; <span class="copyright2">${ownerAGS}</span>
+              </div>
+              <div class="opacity-75">
+                <div class="profile-badge ms-3">
+                  <img src="assets/img/kaiadmin/icon.png" alt="Profile Admin">
+                  <span class="copyright2">${ownerAGS}</span>
+                  <i class='bx bxs-badge-check text-info verified'></i>
                 </div>
-              </div> 
-            </div>
-
-            <h5 class="card-title mb-3">${post.judulLiv}</h5>
-
-            <div class="d-flex align-items-center mb-1 text-muted small fw-semibold">
-              <i class="bi bi-person-circle me-2"></i>
-              <span>Author: ${post.author}</span>
-            </div>
-
-            <div class="d-flex align-items-center mb-1 text-muted small fw-semibold">
-              <i class="bi bi-calendar3 me-2"></i>
-              <span>Date: ${post.dateLiv}</span>
-            </div>
-
-            <div class="d-flex align-items-center text-muted small fw-semibold">
-              <i class="bi bi-car-front-fill me-2"></i>
-              <span>Type Car: ${post.typeCar}</span>
-            </div>
-
-            <div class="mt-3 bg-light-subtle rounded-bottom text-center">
-
-              ${tokenUnlocked ? `
-                <div class="gap-1 hstack">
-                  <button class="btn btn-black w-100" onclick="openJSON(${originalIndex}, 'body')">
-                    <i class="fa fa-code me-1"></i>Body
-                  </button>
-                  <button class="btn btn-black w-100" onclick="openJSON(${originalIndex}, 'window')">
-                    <i class="fa fa-code me-1"></i>Window
-                  </button>
-                </div>
-              ` : `<p class="text-warning small mt-2">Masukkan token untuk membuka tombol</p>`}
-
-            </div>
-
+              </div>
+            </div> 
           </div>
+
+          <h5 class="card-title mb-3">${post.judulLiv}</h5>
+
+          <div class="d-flex align-items-center mb-1 text-muted small fw-semibold">
+            <i class="bi bi-person-circle me-2"></i>
+            <span>Author: ${post.author}</span>
+          </div>
+
+          <div class="d-flex align-items-center mb-1 text-muted small fw-semibold">
+            <i class="bi bi-calendar3 me-2"></i>
+            <span>Date: ${post.dateLiv}</span>
+          </div>
+
+          <div class="d-flex align-items-center text-muted small fw-semibold">
+            <i class="bi bi-car-front-fill me-2"></i>
+            <span>Type Car: ${post.typeCar}</span>
+          </div>
+
+          <div class="mt-3 bg-light-subtle rounded-bottom text-center">
+            ${
+              tokenUnlocked
+                ? `
+            <div class="gap-1 hstack">
+              <button class="btn btn-black w-100" onclick="openJSON(${originalIndex}, 'body')">
+                <i class="fa fa-code me-1"></i>Body
+              </button>
+              <button class="btn btn-black w-100" onclick="openJSON(${originalIndex}, 'window')">
+                <i class="fa fa-code me-1"></i>Window
+              </button>
+            </div>
+            `
+                : `<p class="text-warning small mt-2">Masukkan token untuk membuka tombol</p>`
+            }
+          </div>
+
         </div>
       </div>
     `;
+
+    fragment.appendChild(wrapper);
   });
+
+  // append sekali → jauh lebih ringan
+  postContainer.appendChild(fragment);
 }
 
-renderPosts();
 
 
 // ======================================================
