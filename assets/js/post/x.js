@@ -216,7 +216,7 @@ const submitToken = document.getElementById("submitToken");
 const tokenStatus = document.getElementById("tokenStatus");
 
 const ownerAGS = "Arda Style";
-const validTokens = ["ANJINGPEPEK", "xD8WPagyhl"];
+const validTokens = ["ANJINGPEPEK", "xD8WPagyjjkgfdtl"];
 
 // ========== TAMBAHAN PENTING ==========
 let tokenUnlocked = false;
